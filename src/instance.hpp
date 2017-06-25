@@ -21,5 +21,7 @@ class Instance{
         vector<int> sinkCapacity;      //Sink (or shelter) capacity
 
         Instance(string inputPath);
+    private:
+        vector<int> convertVector(string inputString);
 };
 #endif
