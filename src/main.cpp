@@ -18,7 +18,7 @@ void printSolution(solution inputSol){
 
 int main(int argc, char *argv[] ){
     cout << "Faltan Parametros, utilizando instancia 1-4-2-4" << endl;
-    Instance instance = Instance("inputs/InstanciasBEP/InstanceBEP-1-4-2-4.txt");
+    Instance instance = Instance("inputs/InstanceBEP-1-3-3-3.txt");
 
     instance.print();
     
