@@ -3,6 +3,7 @@
 #include <fstream>
 #include <algorithm>
 #include <random>
+#include <chrono>
 #include "instance.hpp"
 #include <boost/algorithm/string.hpp>
 
@@ -108,39 +109,81 @@ solution Instance::generate_random_solution(){
     int totalSources = sourcePeople.size();
     int totalSinks = sinkCapacity.size();
 
-    default_random_engine generator;
+    //literally random stuff
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    default_random_engine generator(seed);
     uniform_int_distribution<int> sourceDist(0,totalSources-1);
     uniform_int_distribution<int> sinkDist(0,totalSinks-1);
 
     vector<tuple<int,int>> flatSolution;
 
-    while(peopleLeft[min_element(peopleLeft.begin(), peopleLeft.end())-peopleLeft.begin()] != 0){
-        //feasible indexes 
+    //Generating feasible solution asuming a single bus
+    while(peopleLeft[max_element(peopleLeft.begin(), peopleLeft.end())-peopleLeft.begin()] != 0){
+        //feasible indexes
         int i = sourceDist(generator);  //source (collection point) index
         int j = sinkDist(generator);    //sink (shelter) index
 
-        while(peopleLeft.at(i) != 0){
+        while(peopleLeft.at(i) == 0){
             i = sourceDist(generator);
         }
-        while(shelterCapacity.at(j) != 0){
+        while(shelterCapacity.at(j) == 0){
             j = sinkDist(generator);
         }
         
         int evacuatedPeople = min(min(shelterCapacity.at(j), peopleLeft.at(i)), busesCapacity);
 
+
         shelterCapacity[j] -= evacuatedPeople;
         peopleLeft[i] -= evacuatedPeople;
+        
         
         tuple<int,int> tmpTuple(i,j);
         flatSolution.push_back(tmpTuple);
     }
-
+    
+    //Distributing solution equally increasing bus parallelism that reduces total time.
     solution fullSolution;
-    fullSolution.push_back(flatSolution);
+
+    int delta = flatSolution.size()/totalBuses;
+    int i;
+    for(i=0; i<totalBuses-1; i++){
+        vector<tuple<int,int>> tmpVector(flatSolution.begin()+delta*i,flatSolution.begin()+delta*(i+1));
+        fullSolution.push_back(tmpVector);
+    }
+
+    i += 1;
+    vector<tuple<int,int>> tmpVector(flatSolution.begin()+delta*i, flatSolution.end());
+    fullSolution.push_back(tmpVector);
 
     return fullSolution;
 }
 
+int Instance::evaluate_solution(solution inputSol){
+    vector<int> busesLeft = stationBuses;
+    int currentStation = 0;
+    int bestTime = 0;
+
+    for (vector<tuple<int,int>> busPath : inputSol){
+        int totalTime = 0;
+        for(int a = 0 ; a < busPath.size() ; a++){
+            tuple<int,int> currentArc = busPath.at(a);
+            if(a==0) totalTime += stationSourceDistance.at(currentStation).at(get<0>(currentArc));
+            else totalTime += sourceSinkDistance.at(get<0>(currentArc)).at(get<1>(busPath.at(a-1))); 
+            totalTime += sourceSinkDistance.at(get<0>(currentArc)).at(get<1>(currentArc));
+        }
+        if (totalTime >= bestTime) bestTime = totalTime;
+        
+        busesLeft.at(currentStation) -= 1;
+        if (busesLeft.at(currentStation) == 0) currentStation += 1;
+    }
+    return bestTime;
+}
+
 solution Instance::solve(){
-    return generate_random_solution();
+    //1. Generating a starting solution
+    //2. Generating neighborhood moving the current solution
+    //3. select neighbor and compare it to the current solution, if there is not the algorithm found the best local solution.
+    solution randSolution = generate_random_solution();
+    cout << evaluate_solution(randSolution) << endl;
+    return randSolution;
 }

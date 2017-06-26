@@ -29,5 +29,6 @@ class Instance{
     private:
         vector<int> convert_vector(string inputString);
         solution generate_random_solution();
+        int evaluate_solution(solution inputSol);
 };
 #endif

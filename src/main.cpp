@@ -9,10 +9,11 @@ using namespace std;
 
 void printSolution(solution inputSol){
     for(vector<tuple<int,int>> vector: inputSol){
+        cout <<"{";
         for(tuple<int,int> t: vector){
-            cout << "("<<get<0>(t)<<","<<get<1>(t)<<")";
+            cout << "("<<get<0>(t)+1<<","<<get<1>(t)+1<<")";
         }
-        cout << endl;
+        cout <<"}"<< endl;
     }
 }
 
