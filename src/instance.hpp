@@ -5,6 +5,8 @@
 
 using namespace std;
 
+typedef vector<vector<tuple<int,int>>> solution;
+
 class Instance{
     public:
         int totalBuses;        //Total amount of buses avaliable
@@ -21,7 +23,11 @@ class Instance{
         vector<int> sinkCapacity;      //Sink (or shelter) capacity
 
         Instance(string inputPath);
+        void print();
+        solution solve();
+    
     private:
-        vector<int> convertVector(string inputString);
+        vector<int> convert_vector(string inputString);
+        solution generate_random_solution();
 };
 #endif
