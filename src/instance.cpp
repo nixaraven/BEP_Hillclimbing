@@ -178,13 +178,14 @@ vector<solution> Instance::get_hood(solution initialSol){
 vector<solution> Instance::get_neighborhood(solution initialSol){
     vector<solution> neighborhood;
     
+    cout << "Generating Solution Neighbors..." << endl;
+
     for(int i = 0; i < initialSol.size(); i++){
         vector<tuple<int,int>> schedule = initialSol.at(i);
         for(int j = 0; j < schedule.size(); j++){
             tuple<int,int> arc = schedule.at(0);
             schedule.erase(schedule.begin());
             schedule.push_back(arc);
-            cout << "--------------" << endl;
             
             solution newSol = initialSol;
             vector<tuple<int,int>> newSchedule = schedule;
@@ -241,7 +242,7 @@ solution Instance::solve(){
         bool localSolution = true;
         for(solution neighbor : neighborhood){
             int currentEvaluation = evaluate_solution(neighbor);
-            cout <<"actual: "<< currentEvaluation << " mejor: " << bestEvaluation << endl;
+            //cout <<"actual: "<< currentEvaluation << " mejor: " << bestEvaluation << endl;
             if(currentEvaluation < bestEvaluation){
                 localSolution = false;
                 bestEvaluation = currentEvaluation;
@@ -250,6 +251,6 @@ solution Instance::solve(){
         }
         if(localSolution) break;
     }
-
+    cout << "Best Solution Evaluation: " << bestEvaluation << endl; 
     return bestSolution;
 }
