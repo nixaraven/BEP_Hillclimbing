@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
-#include "instance.hpp"
 #include <boost/algorithm/string.hpp>
+#include "instance.hpp"
 
 using namespace std;
 
@@ -144,16 +144,24 @@ solution Instance::generate_random_solution(){
     //Distributing solution equally increasing bus parallelism that reduces total time.
     solution fullSolution;
 
-    int delta = flatSolution.size()/totalBuses;
-    int i;
-    for(i=0; i<totalBuses-1; i++){
-        vector<tuple<int,int>> tmpVector(flatSolution.begin()+delta*i,flatSolution.begin()+delta*(i+1));
-        fullSolution.push_back(tmpVector);
-    }
+    //int delta = flatSolution.size()/totalBuses;
+    //int i;
+    //for(i=0; i<totalBuses-1; i++){
+    //    vector<tuple<int,int>> tmpVector(flatSolution.begin()+delta*i,flatSolution.begin()+delta*(i+1));
+    //    fullSolution.push_back(tmpVector);
+    //}
 
-    i += 1;
-    vector<tuple<int,int>> tmpVector(flatSolution.begin() + delta * i, flatSolution.end());
-    fullSolution.push_back(tmpVector);
+    //i += 1;
+    //vector<tuple<int,int>> tmpVector(flatSolution.begin() + delta * i, flatSolution.end());
+    //fullSolution.push_back(tmpVector);
+
+    for(int i = 0; i < totalBuses ; i++){
+        vector<tuple<int,int>> newVector;
+        fullSolution.push_back(newVector);
+    }
+    for(int i = 0; i < flatSolution.size() ; i++){
+        fullSolution.at(i%totalBuses).push_back(flatSolution.at(i));
+    }
 
     return fullSolution;
 }
@@ -195,7 +203,6 @@ vector<solution> Instance::get_neighborhood(solution initialSol){
         }
     }
     
-
     return neighborhood;
 }
 
