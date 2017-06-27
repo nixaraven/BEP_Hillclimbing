@@ -152,10 +152,50 @@ solution Instance::generate_random_solution(){
     }
 
     i += 1;
-    vector<tuple<int,int>> tmpVector(flatSolution.begin()+delta*i, flatSolution.end());
+    vector<tuple<int,int>> tmpVector(flatSolution.begin() + delta * i, flatSolution.end());
     fullSolution.push_back(tmpVector);
 
     return fullSolution;
+}
+
+vector<solution> Instance::get_hood(solution initialSol){
+    //generating neighborhood using movement over the initial solution
+    vector<solution> neighborhood;
+    int solutionSize = initialSol.size();
+    
+    for(int i = 0; i < initialSol.size(); i++){
+        for(int j=0; j < initialSol.size(); j++){
+            if(i != j){
+                solution swappedSolution = initialSol;
+                swappedSolution.at(i).swap(swappedSolution.at(j));
+                neighborhood.push_back(swappedSolution);
+            }
+        }
+    }
+    return neighborhood;
+}
+
+vector<solution> Instance::get_neighborhood(solution initialSol){
+    vector<solution> neighborhood;
+    
+    for(int i = 0; i < initialSol.size(); i++){
+        vector<tuple<int,int>> schedule = initialSol.at(i);
+        for(int j = 0; j < schedule.size(); j++){
+            tuple<int,int> arc = schedule.at(0);
+            schedule.erase(schedule.begin());
+            schedule.push_back(arc);
+            cout << "--------------" << endl;
+            
+            solution newSol = initialSol;
+            vector<tuple<int,int>> newSchedule = schedule;
+            newSol.at(i) = newSchedule;
+            
+            neighborhood.push_back(newSol);
+        }
+    }
+    
+
+    return neighborhood;
 }
 
 int Instance::evaluate_solution(solution inputSol){
@@ -180,10 +220,36 @@ int Instance::evaluate_solution(solution inputSol){
 }
 
 solution Instance::solve(){
+    //Procedure hill-climbing
+    //local ← FALSE
+        //sc ← select a point at random
+        //Repeat
+            //select sn the best quality point in N (sc )
+            //If f (sn) is better than f (sc ) Then
+                //sc ← sn
+            //Else
+                //local ← TRUE
+        //Until local
+    //End
     //1. Generating a starting solution
+    solution bestSolution = generate_random_solution();
+    int bestEvaluation = evaluate_solution(bestSolution);
     //2. Generating neighborhood moving the current solution
+    vector<solution> neighborhood = get_neighborhood(bestSolution);
     //3. select neighbor and compare it to the current solution, if there is not the algorithm found the best local solution.
-    solution randSolution = generate_random_solution();
-    cout << evaluate_solution(randSolution) << endl;
-    return randSolution;
+    while(true){
+        bool localSolution = true;
+        for(solution neighbor : neighborhood){
+            int currentEvaluation = evaluate_solution(neighbor);
+            cout <<"actual: "<< currentEvaluation << " mejor: " << bestEvaluation << endl;
+            if(currentEvaluation < bestEvaluation){
+                localSolution = false;
+                bestEvaluation = currentEvaluation;
+                bestSolution = neighbor;
+            }
+        }
+        if(localSolution) break;
+    }
+
+    return bestSolution;
 }

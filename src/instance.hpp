@@ -30,5 +30,7 @@ class Instance{
         vector<int> convert_vector(string inputString);
         solution generate_random_solution();
         int evaluate_solution(solution inputSol);
+        vector<solution> get_hood(solution initialSol);
+        vector<solution> get_neighborhood(solution initialSol);
 };
 #endif
