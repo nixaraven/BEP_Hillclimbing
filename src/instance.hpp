@@ -7,6 +7,11 @@ using namespace std;
 
 typedef vector<vector<tuple<int,int>>> solution;
 
+typedef struct {
+    solution schedule;
+    int time;
+}evacuationPlan;
+
 class Instance{
     public:
         int totalBuses;        //Total amount of buses avaliable
@@ -24,8 +29,10 @@ class Instance{
 
         Instance(string inputPath);
         void print();
-        solution solve();
-    
+        evacuationPlan solve();
+        vector<int> get_buses_costs(solution inputSol);
+        vector<int> get_total_sink(solution inputSol);
+
     private:
         vector<int> convert_vector(string inputString);
         solution generate_random_solution();

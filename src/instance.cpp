@@ -95,11 +95,9 @@ Instance::Instance(string inputPath){
             vector<int> tmpVector = convert_vector(splitLine.at(1));
             sourceSinkDistance.push_back(tmpVector);
         }
-
-
     }
     else cout << "No ha sido posible abrir el archivo";
-
+    fileStream.close();
 }
 
 solution Instance::generate_random_solution(){ 
@@ -159,8 +157,21 @@ solution Instance::generate_random_solution(){
         vector<tuple<int,int>> newVector;
         fullSolution.push_back(newVector);
     }
-    for(int i = 0; i < flatSolution.size() ; i++){
-        fullSolution.at(i%totalBuses).push_back(flatSolution.at(i));
+    int breakPoint = flatSolution.size()/totalBuses * totalBuses; 
+    uniform_int_distribution<int> busesDist(0,totalBuses-1);
+    vector<bool> fullSchedule(totalBuses, false);
+    for(int i = 0; i < flatSolution.size(); i++){
+        if(i < breakPoint){
+            fullSolution.at(i%totalBuses).push_back(flatSolution.at(i));
+        }
+        else{
+            int random;
+            do{
+                random = busesDist(generator);
+            }while(fullSchedule.at(random));
+            fullSolution.at(random).push_back(flatSolution.at(i));
+            fullSchedule.at(random) = true;
+        }
     }
 
     return fullSolution;
@@ -186,7 +197,7 @@ vector<solution> Instance::get_hood(solution initialSol){
 vector<solution> Instance::get_neighborhood(solution initialSol){
     vector<solution> neighborhood;
     
-    cout << "Generating Solution Neighbors..." << endl;
+//    cout << "Generating Solution Neighbors..." << endl;
 
     for(int i = 0; i < initialSol.size(); i++){
         vector<tuple<int,int>> schedule = initialSol.at(i);
@@ -227,7 +238,43 @@ int Instance::evaluate_solution(solution inputSol){
     return bestTime;
 }
 
-solution Instance::solve(){
+vector<int> Instance::get_buses_costs(solution inputSol){
+    vector<int> costs;
+    vector<int> busesLeft = stationBuses;
+    int currentStation = 0;
+
+    for (vector<tuple<int,int>> busPath : inputSol){
+        int totalTime = 0;
+        for(int a = 0 ; a < busPath.size() ; a++){
+            tuple<int,int> currentArc = busPath.at(a);
+            if(a==0) totalTime += stationSourceDistance.at(currentStation).at(get<0>(currentArc));
+            else totalTime += sourceSinkDistance.at(get<0>(currentArc)).at(get<1>(busPath.at(a-1))); 
+            totalTime += sourceSinkDistance.at(get<0>(currentArc)).at(get<1>(currentArc));
+        }
+        costs.push_back(totalTime);
+
+        busesLeft.at(currentStation) -= 1;
+        if (busesLeft.at(currentStation) == 0) currentStation += 1;
+    }
+    return costs;
+    
+}
+
+vector<int> Instance::get_total_sink(solution inputSol){
+    vector<int> peopleRescued(totalSink);
+    vector<int> peopleLeft = sourcePeople;
+    for(vector<tuple<int,int>> schedule : inputSol){
+        for(tuple<int,int> arc : schedule){
+            int currentSink = get<1>(arc);
+            int currentSource = get<0>(arc);
+            peopleRescued.at(currentSink) += min(peopleLeft.at(currentSource), busesCapacity);
+            peopleLeft.at(currentSource) -= min(peopleLeft.at(currentSource), busesCapacity);
+        }
+    }
+    return peopleRescued;
+}
+
+evacuationPlan Instance::solve(){
     //Procedure hill-climbing
     //local ← FALSE
         //sc ← select a point at random
@@ -258,6 +305,11 @@ solution Instance::solve(){
         }
         if(localSolution) break;
     }
-    cout << "Best Solution Evaluation: " << bestEvaluation << endl; 
-    return bestSolution;
+    //cout << "Best Solution Evaluation: " << bestEvaluation << endl; 
+    
+    evacuationPlan plan;
+    plan.schedule = bestSolution;
+    plan.time = bestEvaluation;
+
+    return plan;
 }
