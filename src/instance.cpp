@@ -6,6 +6,7 @@
 #include <chrono>
 #include <boost/algorithm/string.hpp>
 #include "instance.hpp"
+#include <time.h>
 
 using namespace std;
 
@@ -174,6 +175,8 @@ solution Instance::generate_random_solution(){
         }
     }
 
+    //cout << "Random Solution evaluation: " << evaluate_solution(fullSolution) << endl;
+
     return fullSolution;
 }
 
@@ -310,6 +313,7 @@ evacuationPlan Instance::solve(){
     evacuationPlan plan;
     plan.schedule = bestSolution;
     plan.time = bestEvaluation;
+    plan.endTime = clock(); 
 
     return plan;
 }

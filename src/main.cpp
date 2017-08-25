@@ -79,7 +79,7 @@ int main(int argc, char *argv[] ){
         time_t startTime = clock();
         cout << endl;
         for(int i = 0; i < restarts; i++){
-            cout << "\r"<< "Restarting (" << i << ")";
+            //cout << "\r"<< "Restarting (" << i << ")";
             evacuationPlan answer = instance.solve();
             if (answer.time < bestAnswer.time){
                 bestAnswer = answer;
@@ -87,12 +87,13 @@ int main(int argc, char *argv[] ){
         }
         cout << endl;
         time_t endTime = clock();
-        cout << "-------------------------------------------------------------------------------------------------"<<endl;
         cout << "Best Solution Found!" << endl;
         cout << "Solution Time: " << bestAnswer.time << "\n" << "Schedule:" << endl; 
         print_solution(bestAnswer.schedule);
         cout << "Generated in " << (endTime-startTime)/double(CLOCKS_PER_SEC) << "[s]" << endl;
+        cout << "Best Solution Generated in " << (bestAnswer.endTime-startTime)/double(CLOCKS_PER_SEC) << "[s]" << endl;
         generate_output_file(argv[1], bestAnswer, instance.get_buses_costs(bestAnswer.schedule), instance.get_total_sink(bestAnswer.schedule));
+        cout << "-------------------------------------------------------------------------------------------------"<<endl;
     }
     return 0;
 }

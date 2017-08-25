@@ -35,4 +35,7 @@
 *.out
 *.app
 
+#output files
+*.output
+
 # End of https://www.gitignore.io/api/c++

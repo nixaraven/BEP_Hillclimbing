@@ -10,6 +10,7 @@ typedef vector<vector<tuple<int,int>>> solution;
 typedef struct {
     solution schedule;
     int time;
+    int endTime;
 }evacuationPlan;
 
 class Instance{
